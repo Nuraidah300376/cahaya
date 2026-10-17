@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Crystal Knowledge Quest - Sains Tahun 4 (Sifat Cahaya)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      touch-action: manipulation;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0c1021;
+      font-family: 'Nunito', sans-serif;
+      color: #f8fafc;
+    }
+    h1, h2, h3, .arcade-font {
+      font-family: 'Fredoka', cursive;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 1366px;
+      max-height: 768px;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.2);
+      background-color: #0f172a;
+    }
+    /* Touch controls styling */
+    .touch-btn {
+      touch-action: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.08s ease, filter 0.08s ease;
+    }
+    .touch-btn:active {
+      transform: scale(0.92);
+      filter: brightness(1.25);
+    }
+    /* Custom scrollbar for modals */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(56, 189, 248, 0.5);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 flex flex-col items-center justify-center min-h-screen">
+
+  <div id="game-container">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+    <!-- Top Floating HUD -->
+    <div id="hud-bar" class="absolute top-2 left-2 right-2 md:top-4 md:left-6 md:right-6 pointer-events-none flex justify-between items-center z-10 hidden">
+      <!-- Player Info & Lives -->
+      <div class="flex items-center space-x-2 md:space-x-3 bg-slate-900/85 backdrop-blur-md px-3 py-1.5 md:px-4 md:py-2 rounded-2xl border border-cyan-500/30 shadow-lg">
+        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-xs md:text-sm border border-cyan-300">
+          <span id="hud-player-tag">P1</span>
+        </div>
+        <div class="flex flex-col">
+          <div class="text-[10px] md:text-xs font-extrabold uppercase tracking-wider text-cyan-400" id="hud-level-name">Tahap 1</div>
+          <div id="hud-hearts" class="flex text-rose-500 text-sm md:text-lg leading-none">❤️❤️❤️</div>
+        </div>
+      </div>
+
+      <!-- Center Objectives & Quest Indicator -->
+      <div class="flex items-center space-x-2 md:space-x-4 bg-slate-900/85 backdrop-blur-md px-4 py-1.5 md:py-2 rounded-2xl border border-amber-500/30 shadow-lg">
+        <div class="flex items-center space-x-1">
+          <span class="text-xs md:text-sm font-black text-amber-400">KRISTAL:</span>
+          <span id="hud-crystals" class="font-extrabold text-white text-xs md:text-base">0 / 4</span>
+        </div>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <div class="flex items-center space-x-1">
+          <span class="text-xs md:text-sm font-black text-emerald-400">SAINS:</span>
+          <span id="hud-learn-score" class="font-extrabold text-emerald-300 text-xs md:text-base">0</span>
+        </div>
+        <div class="h-4 w-px bg-slate-700 hidden sm:block"></div>
+        <div class="hidden sm:flex items-center space-x-1">
+          <span class="text-xs md:text-sm font-black text-purple-400">ARKED:</span>
+          <span id="hud-arcade-score" class="font-extrabold text-purple-300 text-xs md:text-base">0</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons (Sound, Pause) -->
+      <div class="pointer-events-auto flex items-center space-x-2">
+        <button id="btn-audio-toggle" class="p-2 md:p-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 rounded-xl text-cyan-400 shadow-md active:scale-95 transition">
+          <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+          <svg id="icon-sound-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+        </button>
+        <button id="btn-pause-toggle" class="p-2 md:p-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 rounded-xl text-amber-400 shadow-md active:scale-95 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Onscreen Touch Controls (Mobile/Tablet Friendly) -->
+    <div id="touch-controls" class="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none z-20 md:hidden select-none">
+      <!-- D-Pad Left/Right -->
+      <div class="flex space-x-3 pointer-events-auto">
+        <button id="touch-left" class="touch-btn w-16 h-16 rounded-2xl bg-slate-900/80 border-2 border-cyan-500/50 flex items-center justify-center active:bg-cyan-600/40 text-cyan-300 shadow-xl backdrop-blur-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button id="touch-right" class="touch-btn w-16 h-16 rounded-2xl bg-slate-900/80 border-2 border-cyan-500/50 flex items-center justify-center active:bg-cyan-600/40 text-cyan-300 shadow-xl backdrop-blur-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <!-- Action Button Jump -->
+      <div class="pointer-events-auto">
+        <button id="touch-jump" class="touch-btn w-18 h-18 px-5 py-4 rounded-2xl bg-gradient-to-tr from-amber-600 to-yellow-400 border-2 border-amber-300 flex items-center justify-center active:brightness-125 text-slate-950 font-black shadow-2xl backdrop-blur-sm text-sm">
+          LOMPAT
+        </button>
+      </div>
+    </div>
+
+    <!-- Start & Main Menu Screen -->
+    <div id="screen-menu" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-30">
+      <div class="max-w-xl w-full bg-slate-900/95 border-2 border-cyan-500/40 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center space-y-6">
+        <div class="inline-flex items-center space-x-2 bg-cyan-950/80 border border-cyan-500/40 px-3.5 py-1 rounded-full text-xs font-bold text-cyan-300">
+          <span>KSSR SEMAKAN • SAINS TAHUN 4</span>
+        </div>
+        <div>
+          <h1 class="text-3xl md:text-5xl font-black bg-gradient-to-r from-cyan-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">
+            CRYSTAL KNOWLEDGE QUEST
+          </h1>
+          <p class="text-slate-400 text-xs md:text-sm mt-1">Ekspedisi Sains: 5.0 Sifat Cahaya</p>
+        </div>
+
+        <!-- Input Kod Pelajar -->
+        <div class="w-full max-w-xs space-y-2 text-left">
+          <label for="input-player-id" class="text-xs font-bold uppercase tracking-wider text-slate-300">Kod Pengenalan Murid:</label>
+          <input type="text" id="input-player-id" value="MURID_01" maxlength="15" 
+            class="w-full bg-slate-950 border border-slate-700 focus:border-cyan-400 rounded-xl px-4 py-2.5 text-center text-cyan-300 font-extrabold outline-none uppercase tracking-wider text-sm transition">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
+          <button id="btn-start-game" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-base shadow-lg shadow-cyan-500/25 active:scale-95 transition">
+            MULA KEMBARA
+          </button>
+          <button id="btn-instructions" class="w-full py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-base active:scale-95 transition">
+            PANDUAN MAIN
+          </button>
+        </div>
+
+        <div class="text-[11px] text-slate-400 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800 w-full">
+          💡 <strong>Kawalan:</strong> Kekunci [A][D] atau [Anak Panah] untuk bergerak, [Space] / [Atas] untuk melompat.
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="screen-instructions" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-40 hidden">
+      <div class="max-w-2xl w-full bg-slate-900 border border-cyan-500/30 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+        <h2 class="text-2xl font-black text-cyan-300 mb-3">Panduan Permainan & Misi</h2>
+        <div class="overflow-y-auto space-y-4 pr-2 text-xs md:text-sm text-slate-300">
+          <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800">
+            <h3 class="font-black text-amber-400 mb-1">Objektif Pembelajaran:</h3>
+            <ul class="list-disc list-inside space-y-1 text-slate-300">
+              <li><strong>Tahap 1: Crystal Forest</strong> - Kuasai konsep cahaya bergerak lurus dan pembentukan bayang-bayang (SP 5.1).</li>
+              <li><strong>Tahap 2: Floating Islands</strong> - Fahami pantulan cahaya, rajah sinar, dan alatan optik cermin (SP 5.2).</li>
+              <li><strong>Tahap 3: Mastery Mountain</strong> - Rungkaikan fenomena pembiasan cahaya dan pembentukan pelangi (SP 5.3).</li>
+            </ul>
+          </div>
+          <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800">
+            <h3 class="font-black text-cyan-400 mb-1">Mekanik Cabaran Interaktif:</h3>
+            <p>Sentuh <strong>Kristal Ilmu</strong> terapung untuk membuka soalan saintifik. Pilih objek atau tindakan yang tepat berdasarkan konsep sains sebenar. Sekiranya salah, baca maklum balas pembetulan untuk mencuba semula tanpa kehilangan nyawa arked.</p>
+          </div>
+          <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800">
+            <h3 class="font-black text-emerald-400 mb-1">Sistem Penilaian (Dual-Track Score):</h3>
+            <p><strong>Skor Sains:</strong> Diperoleh melalui ketepatan menjawab cabaran kurikulum (Sasaran: ≥ 80% Penguasaan).<br>
+            <strong>Skor Arked:</strong> Mengumpul kristal kecil dan bonus kelajuan pergerakan platformer.</p>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
+          <button id="btn-close-instructions" class="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs md:text-sm transition">
+            FAHAM & KEMBALI
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning Challenge Interactive Modal -->
+    <div id="modal-challenge" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 z-40 hidden">
+      <div class="max-w-xl w-full bg-slate-900 border-2 border-amber-400/50 rounded-3xl p-5 md:p-6 shadow-2xl flex flex-col space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="quiz-id-tag" class="text-xs font-black uppercase text-amber-400 tracking-wider">CABARAN C-LV1-01</span>
+          </div>
+          <span id="quiz-sp-tag" class="text-[10px] md:text-xs font-bold bg-slate-800 text-cyan-300 px-2.5 py-1 rounded-full border border-cyan-500/20">
+            SP 5.1.1
+          </span>
+        </div>
+
+        <!-- Question Prompt -->
+        <p id="quiz-prompt" class="text-sm md:text-base font-extrabold text-slate-100 leading-snug">
+          Soalan cabaran pembelajaran akan dipaparkan di sini...
+        </p>
+
+        <!-- Options Container -->
+        <div id="quiz-options-container" class="space-y-2.5 pt-1">
+          <!-- Dynamic Buttons Injected Here -->
+        </div>
+
+        <!-- Feedback Notification Card -->
+        <div id="quiz-feedback-box" class="p-3 rounded-2xl border text-xs leading-relaxed hidden">
+          <!-- Injected Feedback -->
+        </div>
+
+        <!-- Modal Bottom Actions -->
+        <div class="flex justify-end pt-1">
+          <button id="btn-challenge-action" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black text-xs md:text-sm hidden active:scale-95 transition">
+            TERUSKAN KEMBARA
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause Menu Modal -->
+    <div id="modal-pause" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-40 hidden">
+      <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 text-center max-w-sm w-full space-y-4 shadow-2xl">
+        <h2 class="text-2xl font-black text-amber-400">PERMAINAN DIJEDA</h2>
+        <p class="text-xs text-slate-300">Ambil nafas seketika sebelum menyambung penerokaan ilmu.</p>
+        <div class="space-y-2 pt-2">
+          <button id="btn-resume-game" class="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm transition">
+            SAMBUNG MAIN
+          </button>
+          <button id="btn-restart-level" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm border border-slate-700 transition">
+            MULA SEMULA TAHAP INI
+          </button>
+          <button id="btn-quit-main" class="w-full py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 font-bold text-sm border border-rose-900/50 transition">
+            MENU UTAMA
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Achievement & Learning Analytics Screen -->
+    <div id="screen-summary" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-40 hidden overflow-y-auto">
+      <div class="max-w-2xl w-full bg-slate-900 border-2 border-cyan-400/40 rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col space-y-5 my-auto">
+        <div class="text-center space-y-1">
+          <div class="inline-block px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs font-black uppercase tracking-wider mb-1">
+            Laporan Analitik Formatif
+          </div>
+          <h2 class="text-2xl md:text-4xl font-black text-white" id="summary-title">KEMBARA DILENGKAPKAN!</h2>
+          <p class="text-slate-400 text-xs md:text-sm">Analisis Pencapaian Pembelajaran Sains KSSR Semakan</p>
+        </div>
+
+        <!-- Scores & Badges Matrix -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+          <div class="p-3 bg-slate-950/70 rounded-2xl border border-slate-800">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Skor Sains</div>
+            <div id="sum-learn-score" class="text-xl md:text-2xl font-black text-emerald-400">0</div>
+          </div>
+          <div class="p-3 bg-slate-950/70 rounded-2xl border border-slate-800">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Ketepatan 1st Try</div>
+            <div id="sum-accuracy" class="text-xl md:text-2xl font-black text-cyan-400">0%</div>
+          </div>
+          <div class="p-3 bg-slate-950/70 rounded-2xl border border-slate-800">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Skor Arked</div>
+            <div id="sum-arcade-score" class="text-xl md:text-2xl font-black text-purple-400">0</div>
+          </div>
+          <div class="p-3 bg-slate-950/70 rounded-2xl border border-slate-800">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Penguasaan (≥80%)</div>
+            <div id="sum-mastery-status" class="text-xs md:text-sm font-extrabold text-amber-400 mt-1">LAYAK</div>
+          </div>
+        </div>
+
+        <!-- Objective Breakdown -->
+        <div class="bg-slate-950/90 rounded-2xl p-4 border border-slate-800 space-y-2.5 text-xs">
+          <div class="font-extrabold text-slate-300">Pecahan Penguasaan Standard Pembelajaran:</div>
+          <div class="flex items-center justify-between text-slate-400">
+            <span>SP 5.1 (Cahaya Bergerak Lurus & Bayang-bayang)</span>
+            <span id="sum-sp1-val" class="font-bold text-emerald-400">4 / 4 Betul</span>
+          </div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div id="sum-sp1-bar" class="bg-emerald-500 h-full w-full"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-slate-400 pt-1">
+            <span>SP 5.2 (Pantulan Cahaya & Gambar Rajah Sinar)</span>
+            <span id="sum-sp2-val" class="font-bold text-cyan-400">4 / 4 Betul</span>
+          </div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div id="sum-sp2-bar" class="bg-cyan-500 h-full w-full"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-slate-400 pt-1">
+            <span>SP 5.3 (Pembiasan Cahaya & Pelangi)</span>
+            <span id="sum-sp3-val" class="font-bold text-amber-400">4 / 4 Betul</span>
+          </div>
+          <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div id="sum-sp3-bar" class="bg-amber-500 h-full w-full"></div>
+          </div>
+        </div>
+
+        <!-- Export Buttons for Teachers (Sheets & Apps Script Ready) -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+          <button id="btn-export-csv" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs border border-cyan-500/30 flex items-center justify-center space-x-1.5 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Muat Turun CSV (Guru)</span>
+          </button>
+          <button id="btn-export-json" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs border border-amber-500/30 flex items-center justify-center space-x-1.5 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+            <span>Muat Turun JSON</span>
+          </button>
+          <button id="btn-replay-game" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold text-xs shadow-md transition">
+            Main Semula
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Built-in audio synthesizer without external asset dependencies
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playJump() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(420, now + 0.15);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } catch (e) {}
+      }
+      playCoin() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(1320, now + 0.08);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } catch (e) {}
+      }
+      playSuccess() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+            gain.gain.setValueAtTime(0.22, now + idx * 0.09);
+            gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.09 + 0.18);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.09);
+            osc.stop(now + idx * 0.09 + 0.2);
+          });
+        } catch (e) {}
+      }
+      playFail() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } catch (e) {}
+      }
+      playHit() {
+        if (!this.enabled || !this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(110, now);
+          osc.frequency.linearRampToValueAtTime(50, now + 0.15);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } catch (e) {}
+      }
+    }
+    const sound = new SoundEngine();
+
+    // Fully isolated curriculum bank based on approved Blueprint (Tema 5.0 KSSR Sains Thn 4)
+    const LEARNING_DATABASE = [
+      // LEVEL 1: CRYSTAL FOREST (SP 5.1 - Cahaya Bergerak Lurus)
+      {
+        challengeId: "C-LV1-01",
+        level: 1,
+        standardCode: "SP 5.1.1",
+        objectiveId: "OBJ-1",
+        prompt: "Perhatikan alur cahaya matahari yang menerusi celah pokok di hutan ini. Bagaimanakah sifat laluannya?",
+        options: [
+          { text: "A) Beralun seperti ombak air", isCorrect: false },
+          { text: "B) Bergerak lurus tanpa belokan", isCorrect: true },
+          { text: "C) Berputar-putar membentuk bulatan", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Tepat sekali! Cahaya sentiasa merambat mengikut garis lurus melainkan dihalang atau dibiaskan oleh medium lain.",
+        misconceptionFeedback: "Kurang tepat! Lihat alur cahaya matahari di celah kanopi; sinarnya merambat lurus dan tidak membengkok secara spontan.",
+        difficulty: "Asas"
+      },
+      {
+        challengeId: "C-LV1-02",
+        level: 1,
+        standardCode: "SP 5.1.2",
+        objectiveId: "OBJ-1",
+        prompt: "Pintu gua ini memerlukan objek yang menghasilkan bayang-bayang paling gelap dan jelas untuk menutup sensor. Objek manakah yang perlu dipilih?",
+        options: [
+          { text: "A) Kepingan Plastik Jernih (Lutsinar)", isCorrect: false },
+          { text: "B) Kertas Surih Berwarna (Lutcahaya)", isCorrect: false },
+          { text: "C) Papan Kayu Hutan (Legap)", isCorrect: true }
+        ],
+        correctAnswer: "C",
+        explanation: "Hebat! Objek legap menghalang seluruh cahaya daripada melaluinya, lantas membentuk bayang-bayang yang paling gelap dan jelas.",
+        misconceptionFeedback: "Salah! Objek lutsinar membenarkan hampir seluruh cahaya melaluinya sehingga tiada bayang-bayang terbentuk. Pilih bahan legap!",
+        difficulty: "Asas"
+      },
+      {
+        challengeId: "C-LV1-03",
+        level: 1,
+        standardCode: "SP 5.1.2",
+        objectiveId: "OBJ-1",
+        prompt: "Kelaskan bahan ini: Balang kaca jernih membenarkan semua cahaya menembusinya, manakala botol plastik kabur membenarkan sebahagian cahaya melaluinya. Apakah kategori botol plastik kabur itu?",
+        options: [
+          { text: "A) Objek Legap", isCorrect: false },
+          { text: "B) Objek Lutcahaya", isCorrect: true },
+          { text: "C) Objek Pemantul", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Benar! Bahan yang membenarkan hanya sebahagian cahaya menembusinya dikenali sebagai bahan lutcahaya.",
+        misconceptionFeedback: "Perhatikan semula sifatnya: Objek yang membenarkan hanya sebahagian cahaya menembusinya dikelaskan sebagai lutcahaya.",
+        difficulty: "Sederhana"
+      },
+      {
+        challengeId: "C-LV1-04",
+        level: 1,
+        standardCode: "SP 5.1.3",
+        objectiveId: "OBJ-1",
+        prompt: "Bayang-bayang kunci terlalu kecil untuk menutupi mangga portal ajaib. Apakah tindakan saintifik untuk membesarkan saiz bayang-bayang objek?",
+        options: [
+          { text: "A) Menjarakkan sumber cahaya lebih jauh daripada objek", isCorrect: false },
+          { text: "B) Mendekatkan sumber cahaya lebih hampir dengan objek", isCorrect: true },
+          { text: "C) Menolak dinding skrin lebih dekat ke arah objek", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Cemerlang! Semakin dekat jarak antara sumber cahaya dengan objek, semakin besar saiz bayang-bayang yang terhasil pada skrin.",
+        misconceptionFeedback: "Kurang tepat! Jika sumber cahaya dijauhkan, saiz bayang-bayang akan mengecil. Anda perlu mendekatkan sumber cahaya ke objek!",
+        difficulty: "Sederhana"
+      },
+
+      // LEVEL 2: FLOATING ISLANDS (SP 5.2 - Pantulan Cahaya)
+      {
+        challengeId: "C-LV2-01",
+        level: 2,
+        standardCode: "SP 5.2.1",
+        objectiveId: "OBJ-2",
+        prompt: "Sinar laser terhalang oleh tebing pulau. Apakah objek yang berupaya membalikkan arah perambatan alur cahaya tersebut ke sensor sasaran?",
+        options: [
+          { text: "A) Kepingan Cermin Satah Rata", isCorrect: true },
+          { text: "B) Spanspan Berpori", isCorrect: false },
+          { text: "C) Kepingan Kadbod Hitam", isCorrect: false }
+        ],
+        correctAnswer: "A",
+        explanation: "Tepat sekali! Permukaan licin dan berkilat seperti cermin satah memantulkan alur cahaya dengan teratur.",
+        misconceptionFeedback: "Silap! Span dan kadbod menyerap atau menyerakkan cahaya secara berselerak tanpa membentuk sinar pantulan yang jelas.",
+        difficulty: "Asas"
+      },
+      {
+        challengeId: "C-LV2-02",
+        level: 2,
+        standardCode: "SP 5.2.3",
+        objectiveId: "OBJ-2",
+        prompt: "Berdasarkan prinsip gambar rajah sinar pantulan cermin satah, bagaimanakah keadaan sudut sinar pantulan?",
+        options: [
+          { text: "A) Sinar menembusi cermin terus ke belakang", isCorrect: false },
+          { text: "B) Sudut pantulan adalah sama dengan sudut tuju cahaya", isCorrect: true },
+          { text: "C) Sinar bertukar menjadi melengkung di permukaan cermin", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Hebat! Mengikut hukum pantulan cahaya pada cermin rata, sudut tuju adalah sentiasa sama dengan sudut pantulan.",
+        misconceptionFeedback: "Tidak tepat! Cahaya tidak menembusi cermin legap dan tidak membengkok melengkung, tetapi dipantulkan lurus pada sudut sekata.",
+        difficulty: "Sederhana"
+      },
+      {
+        challengeId: "C-LV2-03",
+        level: 2,
+        standardCode: "SP 5.2.2",
+        objectiveId: "OBJ-2",
+        prompt: "Penjelajah perlu melihat musuh yang bersembunyi di balik dinding benteng tanpa mendedahkan diri. Alat ciptaan manusia manakah yang menggunakan pantulan cahaya?",
+        options: [
+          { text: "A) Mikroskop Kanta Pembias", isCorrect: false },
+          { text: "B) Kanta Pembesar Tangan", isCorrect: false },
+          { text: "C) Periskop Dua Cermin", isCorrect: true }
+        ],
+        correctAnswer: "C",
+        explanation: "Tepat! Periskop menggunakan dua cermin satah condong 45 darjah untuk memantulkan imej melangkaui halangan tinggi.",
+        misconceptionFeedback: "Salah pilihan! Kanta pembesar dan mikroskop berfungsi berasaskan pembiasan cahaya, bukan pantulan cermin.",
+        difficulty: "Sederhana"
+      },
+      {
+        challengeId: "C-LV2-04",
+        level: 2,
+        standardCode: "SP 5.2.2",
+        objectiveId: "OBJ-2",
+        prompt: "Kenderaan arked perlu melihat kawasan titik buta di selekoh berbahaya pulau terapung. Alat pantulan manakah yang dipasang di selekoh jalan?",
+        options: [
+          { text: "A) Cermin Cembung Keselamatan Jalan", isCorrect: true },
+          { text: "B) Kaca Prisma Telus", isCorrect: false },
+          { text: "C) Lampu Suluh Berkuasa Tinggi", isCorrect: false }
+        ],
+        correctAnswer: "A",
+        explanation: "Bijak! Cermin cembung memantulkan medan pemandangan yang lebih luas bagi membantu melihat kenderaan di selekoh terlindung.",
+        misconceptionFeedback: "Kurang tepat! Prisma membias cahaya dan lampu suluh mengeluarkan sumber cahaya. Cermin cembung diperlukan untuk pantulan meluas.",
+        difficulty: "Tinggi"
+      },
+
+      // LEVEL 3: MASTERY MOUNTAIN (SP 5.3 - Pembiasan Cahaya)
+      {
+        challengeId: "C-LV3-01",
+        level: 3,
+        standardCode: "SP 5.3.1",
+        objectiveId: "OBJ-3",
+        prompt: "Alur cahaya bergerak dari udara menembusi bongkah kristal kaca jernih lalu kelihatan membengkok. Fenomena sifat cahaya apakah ini?",
+        options: [
+          { text: "A) Penyerapan Tenaga Cahaya", isCorrect: false },
+          { text: "B) Pembiasan Cahaya", isCorrect: true },
+          { text: "C) Pantulan Cahaya Balik", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Sempurna! Pembiasan cahaya ialah pembengkokan arah laluan cahaya apabila merambat melalui dua medium berbeza ketumpatan (udara dan kaca).",
+        misconceptionFeedback: "Cuba lagi! Perubahan arah laluan alur cahaya apabila melintasi medium berbeza ketumpatan dipanggil pembiasan cahaya.",
+        difficulty: "Asas"
+      },
+      {
+        challengeId: "C-LV3-02",
+        level: 3,
+        standardCode: "SP 5.3.2",
+        objectiveId: "OBJ-3",
+        prompt: "Di dalam kolam air gunung, syiling emas kelihatan lebih cetek dan pensel kelihatan patah/bengkok. Mengapakah fenomena ini berlaku?",
+        options: [
+          { text: "A) Cahaya terbias apabila bergerak keluar dari air ke udara", isCorrect: true },
+          { text: "B) Air bertindak memantulkan seluruh bayang syiling", isCorrect: false },
+          { text: "C) Cahaya diserap sepenuhnya oleh kedalaman air", isCorrect: false }
+        ],
+        correctAnswer: "A",
+        explanation: "Cemerlang! Cahaya dari dasar air membengkok (terbias) apabila keluar ke udara yang kurang tumpat, menghasilkan ilusi optik kedalaman cetek.",
+        misconceptionFeedback: "Salah konsep! Ini bukan fenomena pantulan atau penyerapan, sebaliknya kesan pembengkokan cahaya (pembiasan) antara air dan udara.",
+        difficulty: "Sederhana"
+      },
+      {
+        challengeId: "C-LV3-03",
+        level: 3,
+        standardCode: "SP 5.3.3",
+        objectiveId: "OBJ-3",
+        prompt: "Untuk mengaktifkan jambatan spektrum gunung, bagaimanakah fenomena pelangi semula jadi terbentuk di alam sekitar?",
+        options: [
+          { text: "A) Cahaya matahari dipantulkan oleh debu kering di angkasa", isCorrect: false },
+          { text: "B) Cahaya matahari dibiaskan dan diserakkan oleh titisan air hujan", isCorrect: true },
+          { text: "C) Awan tebal menyerap seluruh gelombang warna merah", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Tepat sekali! Titisan air hujan bertindak seperti prisma semula jadi yang membias, memantul dan menyerakkan cahaya putih matahari kepada spektrum 7 warna.",
+        misconceptionFeedback: "Ingat kembali syarat pelangi: Fenomena ini memerlukan kehadiran cahaya matahari dan titisan air untuk membiaskan cahaya.",
+        difficulty: "Sederhana"
+      },
+      {
+        challengeId: "C-LV3-04",
+        level: 3,
+        standardCode: "SP 5.3.4",
+        objectiveId: "OBJ-3",
+        prompt: "Kunci Portal Kebijaksanaan memerlukan alat ciptaan manusia yang menggunakan sifat kanta pembiasan untuk membesarkan imej mikroorganisma. Apakah alat itu?",
+        options: [
+          { text: "A) Periskop Dua Cermin", isCorrect: false },
+          { text: "B) Mikroskop Berkanta Kaca Pembias", isCorrect: true },
+          { text: "C) Kaleidoskop Tiub Cermin", isCorrect: false }
+        ],
+        correctAnswer: "B",
+        explanation: "Tahniah! Mikroskop menggunakan kanta pembias cahaya untuk membesarkan objek seni. Periskop dan kaleidoskop pula menggunakan cermin pemantul.",
+        misconceptionFeedback: "Perhatikan fungsi optiknya: Periskop dan kaleidoskop bergantung kepada pantulan cermin. Untuk pembiasan kanta penumpu, alatnya ialah mikroskop.",
+        difficulty: "Tinggi"
+      }
+    ];
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // High DPI Canvas Scaling & Dynamic Window Sizing
+    function resizeCanvas() {
+      const container = document.getElementById('game-container');
+      const targetW = 1280;
+      const targetH = 720;
+      const scale = Math.min(container.clientWidth / targetW, container.clientHeight / targetH);
+      canvas.style.width = `${targetW * scale}px`;
+      canvas.style.height = `${targetH * scale}px`;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Game Core State
+    const GameState = {
+      playerCode: "MURID_01",
+      currentLevel: 1,
+      lives: 3,
+      arcadeScore: 0,
+      learningScore: 0,
+      collectedCrystalsInLevel: 0,
+      totalCrystalsTarget: 4,
+      isPaused: false,
+      isChallengeActive: false,
+      gameRunning: false,
+      startedAt: null,
+      completedAt: null,
+      checkPointX: 80,
+      checkPointY: 480,
+      // Comprehensive Session Assessment Log
+      sessionResults: {
+        sessionId: "SESSION_" + Date.now(),
+        playerCode: "MURID_01",
+        gameTitle: "Crystal Knowledge Quest",
+        subject: "Sains",
+        topic: "5.0 Sifat Cahaya",
+        curriculumVersion: "KSSR Semakan 2017 Tahun 4",
+        standards: ["SK 5.1", "SK 5.2", "SK 5.3"],
+        challengeResults: [],
+        firstAttemptAccuracy: 0,
+        totalAttempts: 0,
+        learningScore: 0,
+        arcadeScore: 0,
+        completedLevels: [],
+        masteryByObjective: {
+          "OBJ-1": { total: 4, correct: 0, mastered: false },
+          "OBJ-2": { total: 4, correct: 0, mastered: false },
+          "OBJ-3": { total: 4, correct: 0, mastered: false }
+        },
+        completionStatus: "IN_PROGRESS"
+      }
+    };
+
+    const input = {
+      left: false,
+      right: false,
+      jump: false
+    };
+
+    const player = {
+      x: 80,
+      y: 480,
+      width: 42,
+      height: 58,
+      vx: 0,
+      vy: 0,
+      speed: 4.8,
+      jumpPower: -13.5,
+      grounded: false,
+      facingRight: true,
+      invulnerableTimer: 0,
+      animFrame: 0,
+      animTimer: 0
+    };
+
+    // Camera viewport offset
+    const camera = {
+      x: 0,
+      y: 0,
+      width: 1280,
+      height: 720
+    };
+
+    let worldPlatforms = [];
+    let worldHazards = [];
+    let worldCrystals = [];
+    let worldPortals = [];
+    let particles = [];
+
+    // Particle Effect Generator
+    function createBurst(x, y, color = '#38bdf8', count = 12) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 1;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 4 + 2,
+          color: color,
+          alpha: 1.0,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
+    }
+
+    function loadLevel(levelNum) {
+      GameState.currentLevel = levelNum;
+      GameState.collectedCrystalsInLevel = 0;
+      player.x = 80;
+      player.y = 480;
+      player.vx = 0;
+      player.vy = 0;
+      GameState.checkPointX = 80;
+      GameState.checkPointY = 480;
+      worldPlatforms = [];
+      worldHazards = [];
+      worldCrystals = [];
+      worldPortals = [];
+      particles = [];
+
+      document.getElementById('hud-level-name').innerText = `Tahap ${levelNum}: ${
+        levelNum === 1 ? 'Crystal Forest' : levelNum === 2 ? 'Floating Islands' : 'Mastery Mountain'
+      }`;
+      updateHud();
+
+      // Common Ground Base
+      worldPlatforms.push({ x: 0, y: 640, width: 2800, height: 80, type: 'ground' });
+
+      if (levelNum === 1) {
+        // LEVEL 1: Crystal Forest (Broad platforms, linear stepping)
+        const plats = [
+          { x: 260, y: 520, width: 180, height: 24 },
+          { x: 540, y: 440, width: 190, height: 24 },
+          { x: 840, y: 380, width: 180, height: 24 },
+          { x: 1140, y: 460, width: 190, height: 24 },
+          { x: 1440, y: 380, width: 180, height: 24 },
+          { x: 1740, y: 460, width: 200, height: 24 },
+          { x: 2040, y: 390, width: 180, height: 24 },
+          { x: 2340, y: 520, width: 220, height: 24 }
+        ];
+        plats.forEach(p => worldPlatforms.push({ ...p, type: 'wood' }));
+
+        // Hazards (Forest Spikes)
+        worldHazards.push({ x: 740, y: 616, width: 80, height: 24, type: 'spikes' });
+        worldHazards.push({ x: 1340, y: 616, width: 90, height: 24, type: 'spikes' });
+        worldHazards.push({ x: 1940, y: 616, width: 90, height: 24, type: 'spikes' });
+
+        // 4 Learning Crystals matching Level 1 Challenges
+        const l1Quizzes = LEARNING_DATABASE.filter(q => q.level === 1);
+        worldCrystals.push({ x: 350, y: 470, data: l1Quizzes[0], collected: false, color: '#34d399' });
+        worldCrystals.push({ x: 930, y: 330, data: l1Quizzes[1], collected: false, color: '#34d399' });
+        worldCrystals.push({ x: 1530, y: 330, data: l1Quizzes[2], collected: false, color: '#34d399' });
+        worldCrystals.push({ x: 2130, y: 340, data: l1Quizzes[3], collected: false, color: '#34d399' });
+
+        // End Portal
+        worldPortals.push({ x: 2460, y: 440, width: 70, height: 95, targetLevel: 2, unlocked: false });
+
+      } else if (levelNum === 2) {
+        // LEVEL 2: Floating Islands (Floating stones with moving hazards)
+        const plats = [
+          { x: 240, y: 520, width: 170, height: 24 },
+          { x: 500, y: 430, width: 180, height: 24 },
+          { x: 780, y: 360, width: 160, height: 24 },
+          { x: 1040, y: 440, width: 180, height: 24 },
+          { x: 1320, y: 350, width: 170, height: 24 },
+          { x: 1600, y: 440, width: 180, height: 24 },
+          { x: 1880, y: 370, width: 160, height: 24 },
+          { x: 2160, y: 480, width: 220, height: 24 }
+        ];
+        plats.forEach(p => worldPlatforms.push({ ...p, type: 'stone' }));
+
+        // Dynamic Moving Laser Patrol Hazards
+        worldHazards.push({ x: 680, y: 420, width: 40, height: 40, vx: 2.2, minX: 680, maxX: 880, type: 'orb' });
+        worldHazards.push({ x: 1220, y: 340, width: 40, height: 40, vx: 2.5, minX: 1220, maxX: 1480, type: 'orb' });
+        worldHazards.push({ x: 1760, y: 430, width: 40, height: 40, vx: -2.8, minX: 1720, maxX: 1980, type: 'orb' });
+
+        // Ground chasms
+        worldHazards.push({ x: 420, y: 616, width: 120, height: 24, type: 'spikes' });
+        worldHazards.push({ x: 960, y: 616, width: 130, height: 24, type: 'spikes' });
+        worldHazards.push({ x: 1500, y: 616, width: 130, height: 24, type: 'spikes' });
+
+        // 4 Learning Crystals Level 2
+        const l2Quizzes = LEARNING_DATABASE.filter(q => q.level === 2);
+        worldCrystals.push({ x: 320, y: 470, data: l2Quizzes[0], collected: false, color: '#38bdf8' });
+        worldCrystals.push({ x: 860, y: 310, data: l2Quizzes[1], collected: false, color: '#38bdf8' });
+        worldCrystals.push({ x: 1400, y: 300, data: l2Quizzes[2], collected: false, color: '#38bdf8' });
+        worldCrystals.push({ x: 1960, y: 320, data: l2Quizzes[3], collected: false, color: '#38bdf8' });
+
+        worldPortals.push({ x: 2270, y: 400, width: 70, height: 95, targetLevel: 3, unlocked: false });
+
+      } else if (levelNum === 3) {
+        // LEVEL 3: Mastery Mountain (Steep ascending platforms, icy crystals)
+        const plats = [
+          { x: 220, y: 520, width: 160, height: 24 },
+          { x: 470, y: 450, width: 160, height: 24 },
+          { x: 730, y: 380, width: 170, height: 24 },
+          { x: 990, y: 320, width: 160, height: 24 },
+          { x: 1250, y: 260, width: 180, height: 24 },
+          { x: 1530, y: 340, width: 160, height: 24 },
+          { x: 1800, y: 420, width: 170, height: 24 },
+          { x: 2080, y: 340, width: 170, height: 24 },
+          { x: 2360, y: 270, width: 220, height: 24 }
+        ];
+        plats.forEach(p => worldPlatforms.push({ ...p, type: 'ice' }));
+
+        // Hazards: Falling Frost Orbs & Thermal Geysers
+        worldHazards.push({ x: 620, y: 370, width: 36, height: 36, vx: 3.0, minX: 620, maxX: 850, type: 'orb' });
+        worldHazards.push({ x: 1150, y: 250, width: 36, height: 36, vx: -3.2, minX: 1140, maxX: 1380, type: 'orb' });
+        worldHazards.push({ x: 1700, y: 330, width: 36, height: 36, vx: 3.0, minX: 1680, maxX: 1920, type: 'orb' });
+
+        worldHazards.push({ x: 880, y: 616, width: 160, height: 24, type: 'spikes' });
+        worldHazards.push({ x: 1400, y: 616, width: 180, height: 24, type: 'spikes' });
+
+        // 4 Learning Crystals Level 3
+        const l3Quizzes = LEARNING_DATABASE.filter(q => q.level === 3);
+        worldCrystals.push({ x: 300, y: 470, data: l3Quizzes[0], collected: false, color: '#f59e0b' });
+        worldCrystals.push({ x: 810, y: 330, data: l3Quizzes[1], collected: false, color: '#f59e0b' });
+        worldCrystals.push({ x: 1340, y: 210, data: l3Quizzes[2], collected: false, color: '#f59e0b' });
+        worldCrystals.push({ x: 2160, y: 290, data: l3Quizzes[3], collected: false, color: '#f59e0b' });
+
+        // Grand Mastery Portal of Wisdom
+        worldPortals.push({ x: 2470, y: 190, width: 75, height: 100, targetLevel: 4, unlocked: false });
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      sound.init();
+      if (['ArrowUp', 'KeyW', 'Space'].includes(e.code)) {
+        input.jump = true;
+        e.preventDefault();
+      }
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) {
+        input.left = true;
+        e.preventDefault();
+      }
+      if (['ArrowRight', 'KeyD'].includes(e.code)) {
+        input.right = true;
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (['ArrowUp', 'KeyW', 'Space'].includes(e.code)) input.jump = false;
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) input.left = false;
+      if (['ArrowRight', 'KeyD'].includes(e.code)) input.right = false;
+    });
+
+    // Touch Event Handlers with Prevention of Scrolling
+    function bindTouchButton(elemId, keyProp) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      const setTrue = (e) => {
+        e.preventDefault();
+        sound.init();
+        input[keyProp] = true;
+      };
+      const setFalse = (e) => {
+        e.preventDefault();
+        input[keyProp] = false;
+      };
+      el.addEventListener('touchstart', setTrue, { passive: false });
+      el.addEventListener('touchend', setFalse, { passive: false });
+      el.addEventListener('touchcancel', setFalse, { passive: false });
+      el.addEventListener('mousedown', setTrue);
+      el.addEventListener('mouseup', setFalse);
+      el.addEventListener('mouseleave', setFalse);
+    }
+    bindTouchButton('touch-left', 'left');
+    bindTouchButton('touch-right', 'right');
+    bindTouchButton('touch-jump', 'jump');
+
+    function updateHud() {
+      document.getElementById('hud-player-tag').innerText = GameState.playerCode.substring(0, 3).toUpperCase();
+      document.getElementById('hud-crystals').innerText = `${GameState.collectedCrystalsInLevel} / ${GameState.totalCrystalsTarget}`;
+      document.getElementById('hud-learn-score').innerText = GameState.learningScore;
+      document.getElementById('hud-arcade-score').innerText = GameState.arcadeScore;
+
+      let hearts = '';
+      for (let i = 0; i < GameState.lives; i++) hearts += '❤️';
+      document.getElementById('hud-hearts').innerText = hearts || '💀';
+    }
+
+    function updatePhysics(dt) {
+      if (GameState.isPaused || GameState.isChallengeActive || !GameState.gameRunning) return;
+
+      // Invulnerability flicker
+      if (player.invulnerableTimer > 0) {
+        player.invulnerableTimer -= dt;
+      }
+
+      // Horizontal acceleration and friction
+      if (input.left) {
+        player.vx = -player.speed;
+        player.facingRight = false;
+      } else if (input.right) {
+        player.vx = player.speed;
+        player.facingRight = true;
+      } else {
+        player.vx *= 0.82;
+        if (Math.abs(player.vx) < 0.1) player.vx = 0;
+      }
+
+      // Jump Execution
+      if (input.jump && player.grounded) {
+        player.vy = player.jumpPower;
+        player.grounded = false;
+        sound.playJump();
+        createBurst(player.x + player.width / 2, player.y + player.height, '#e2e8f0', 6);
+      }
+
+      // Gravity
+      player.vy += 0.65;
+      if (player.vy > 14) player.vy = 14;
+
+      // Apply velocity
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Keep in level boundaries
+      if (player.x < 10) player.x = 10;
+      if (player.x > 2750) player.x = 2750;
+
+      // Platform Collision Detection (Solid top landing)
+      player.grounded = false;
+      for (const p of worldPlatforms) {
+        if (
+          player.x + player.width > p.x &&
+          player.x < p.x + p.width &&
+          player.y + player.height >= p.y &&
+          player.y + player.height <= p.y + p.height + player.vy + 2 &&
+          player.vy >= 0
+        ) {
+          player.y = p.y - player.height;
+          player.vy = 0;
+          player.grounded = true;
+          // Set checkpoint on safe landing platforms past halfway
+          if (p.x > GameState.checkPointX && p.y > 300) {
+            GameState.checkPointX = p.x + 20;
+            GameState.checkPointY = p.y - 70;
+          }
+          break;
+        }
+      }
+
+      // Fall off pit
+      if (player.y > 750) {
+        handleHazardHit("Terjatuh ke dalam jurang");
+      }
+
+      // Update Moving Hazards
+      for (const h of worldHazards) {
+        if (h.vx) {
+          h.x += h.vx;
+          if (h.x <= h.minX || h.x >= h.maxX) h.vx *= -1;
+        }
+
+        // Hazard Collision with player
+        if (
+          player.invulnerableTimer <= 0 &&
+          player.x + player.width > h.x &&
+          player.x < h.x + h.width &&
+          player.y + player.height > h.y &&
+          player.y < h.y + h.height
+        ) {
+          handleHazardHit("Terkena halangan tenaga");
+        }
+      }
+
+      // Crystal Item Pickup Detection
+      for (const c of worldCrystals) {
+        if (!c.collected) {
+          const dx = (player.x + player.width / 2) - c.x;
+          const dy = (player.y + player.height / 2) - c.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 42) {
+            c.collected = true;
+            sound.playCoin();
+            createBurst(c.x, c.y, c.color, 16);
+            openChallengeModal(c.data);
+            break;
+          }
+        }
+      }
+
+      // Portal Detection
+      for (const portal of worldPortals) {
+        if (
+          player.x + player.width > portal.x &&
+          player.x < portal.x + portal.width &&
+          player.y + player.height > portal.y &&
+          player.y < portal.y + portal.height
+        ) {
+          if (portal.unlocked) {
+            handleLevelComplete(portal.targetLevel);
+          }
+        }
+      }
+
+      // Smooth Camera Tracking
+      const targetCamX = player.x - camera.width * 0.35;
+      camera.x += (targetCamX - camera.x) * 0.1;
+      if (camera.x < 0) camera.x = 0;
+      if (camera.x > 2800 - camera.width) camera.x = 2800 - camera.width;
+
+      // Update Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const pt = particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.alpha -= pt.decay;
+        if (pt.alpha <= 0) particles.splice(i, 1);
+      }
+    }
+
+    // Hazard Penalty & Checkpoint Respawn
+    function handleHazardHit(reason) {
+      sound.playHit();
+      GameState.lives -= 1;
+      updateHud();
+      createBurst(player.x + player.width / 2, player.y + player.height / 2, '#ef4444', 18);
+
+      if (GameState.lives <= 0) {
+        // Soft reset to beginning of level without penalizing academic scores
+        GameState.lives = 3;
+        player.x = 80;
+        player.y = 480;
+        player.vx = 0;
+        player.vy = 0;
+      } else {
+        // Respawn at latest safe checkpoint
+        player.x = GameState.checkPointX;
+        player.y = GameState.checkPointY;
+        player.vx = 0;
+        player.vy = 0;
+        player.invulnerableTimer = 1.8;
+      }
+    }
+
+    let activeChallenge = null;
+    let challengeAttempts = 0;
+
+    function openChallengeModal(challengeData) {
+      GameState.isChallengeActive = true;
+      activeChallenge = challengeData;
+      challengeAttempts = 0;
+
+      document.getElementById('quiz-id-tag').innerText = challengeData.challengeId;
+      document.getElementById('quiz-sp-tag').innerText = `${challengeData.standardCode} • ${challengeData.difficulty}`;
+      document.getElementById('quiz-prompt').innerText = challengeData.prompt;
+
+      const optsBox = document.getElementById('quiz-options-container');
+      optsBox.innerHTML = '';
+
+      challengeData.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700 hover:border-amber-400 text-slate-100 font-bold text-xs md:text-sm active:scale-[0.98] transition flex items-center justify-between";
+        btn.innerHTML = `<span>${opt.text}</span> <span class="text-amber-400/80 text-xs">Pilih ➔</span>`;
+        btn.onclick = () => submitChallengeAnswer(opt, challengeData);
+        optsBox.appendChild(btn);
+      });
+
+      const feedbackBox = document.getElementById('quiz-feedback-box');
+      feedbackBox.className = 'p-3 rounded-2xl border text-xs leading-relaxed hidden';
+      feedbackBox.innerHTML = '';
+
+      const actBtn = document.getElementById('btn-challenge-action');
+      actBtn.classList.add('hidden');
+
+      document.getElementById('modal-challenge').classList.remove('hidden');
+    }
+
+    function submitChallengeAnswer(selectedOption, challengeData) {
+      challengeAttempts += 1;
+      GameState.sessionResults.totalAttempts += 1;
+
+      const feedbackBox = document.getElementById('quiz-feedback-box');
+      feedbackBox.classList.remove('hidden');
+
+      const isFirst = challengeAttempts === 1;
+
+      if (selectedOption.isCorrect) {
+        sound.playSuccess();
+        // Record Learning Score: +100 first attempt, +50 second, +20 retry
+        const earnedScore = isFirst ? 100 : challengeAttempts === 2 ? 50 : 25;
+        GameState.learningScore += earnedScore;
+        GameState.arcadeScore += 150; // Arcade bonus for success
+        GameState.collectedCrystalsInLevel += 1;
+
+        // Record Analytics
+        const objKey = challengeData.objectiveId;
+        if (GameState.sessionResults.masteryByObjective[objKey]) {
+          GameState.sessionResults.masteryByObjective[objKey].correct += 1;
+          if (GameState.sessionResults.masteryByObjective[objKey].correct >= 3) {
+            GameState.sessionResults.masteryByObjective[objKey].mastered = true;
+          }
+        }
+
+        GameState.sessionResults.challengeResults.push({
+          challengeId: challengeData.challengeId,
+          standardCode: challengeData.standardCode,
+          objectiveId: challengeData.objectiveId,
+          playerAnswer: selectedOption.text.substring(0, 1),
+          correctAnswer: challengeData.correctAnswer,
+          attempts: challengeAttempts,
+          firstAttemptAccuracy: isFirst,
+          earnedScore: earnedScore,
+          timestamp: new Date().toISOString()
+        });
+
+        feedbackBox.className = "p-3.5 rounded-2xl border border-emerald-500/50 bg-emerald-950/80 text-emerald-200 text-xs font-semibold space-y-1";
+        feedbackBox.innerHTML = `
+          <div class="flex items-center space-x-1.5 font-black text-emerald-300">
+            <span>🎉 JAWAPAN TEPAT! (+${earnedScore} Skor Sains)</span>
+          </div>
+          <div>${challengeData.explanation}</div>
+        `;
+
+        // Disable options
+        const optsBox = document.getElementById('quiz-options-container');
+        Array.from(optsBox.children).forEach(child => {
+          child.disabled = true;
+          child.classList.add('opacity-50', 'pointer-events-none');
+        });
+
+        // Show Continue Button
+        const actBtn = document.getElementById('btn-challenge-action');
+        actBtn.classList.remove('hidden');
+        actBtn.onclick = () => {
+          document.getElementById('modal-challenge').classList.add('hidden');
+          GameState.isChallengeActive = false;
+          updateHud();
+
+          // Check if all 4 crystals gathered to unlock portal
+          if (GameState.collectedCrystalsInLevel >= GameState.totalCrystalsTarget) {
+            for (const p of worldPortals) {
+              p.unlocked = true;
+              createBurst(p.x + p.width / 2, p.y + p.height / 2, '#38bdf8', 25);
+            }
+          }
+        };
+
+      } else {
+        // Incorrect Answer with Constructive Pedagogical Feedback
+        sound.playFail();
+        GameState.arcadeScore = Math.max(0, GameState.arcadeScore - 20);
+
+        feedbackBox.className = "p-3.5 rounded-2xl border border-amber-500/50 bg-amber-950/80 text-amber-200 text-xs font-semibold space-y-1.5";
+        let helpTip = challengeAttempts >= 2 ? `<div class="text-[11px] text-yellow-300 font-bold">💡 Bantuan: Ingat semula prinsip perambatan atau pemantulan yang dipelajari dalam DSKP.</div>` : "";
+        feedbackBox.innerHTML = `
+          <div class="flex items-center space-x-1.5 font-black text-rose-300">
+            <span>⚠️ KELIRU / TIDAK TEPAT</span>
+          </div>
+          <div>${challengeData.misconceptionFeedback}</div>
+          ${helpTip}
+          <div class="text-[11px] text-slate-300 italic pt-0.5">Sila semak semula dan pilih semula jawapan di atas.</div>
+        `;
+      }
+    }
+
+    // Level Transition Handler
+    function handleLevelComplete(targetLevel) {
+      sound.playSuccess();
+      GameState.arcadeScore += 500; // Level finish bonus
+
+      if (!GameState.sessionResults.completedLevels.includes(GameState.currentLevel)) {
+        GameState.sessionResults.completedLevels.push(GameState.currentLevel);
+      }
+
+      if (targetLevel > 3) {
+        // Game Completed! Open Summary Screen
+        finishGameSession();
+      } else {
+        loadLevel(targetLevel);
+      }
+    }
+
+    function finishGameSession() {
+      GameState.gameRunning = false;
+      GameState.completedAt = new Date();
+      GameState.sessionResults.completedAt = GameState.completedAt.toISOString();
+      GameState.sessionResults.completionStatus = "COMPLETED";
+
+      // Compute Total Accuracy
+      const totalChallengesAnswered = GameState.sessionResults.challengeResults.length;
+      const firstTriesCount = GameState.sessionResults.challengeResults.filter(r => r.firstAttemptAccuracy).length;
+      const accuracyPct = totalChallengesAnswered > 0 ? Math.round((firstTriesCount / totalChallengesAnswered) * 100) : 0;
+
+      GameState.sessionResults.firstAttemptAccuracy = accuracyPct;
+      GameState.sessionResults.learningScore = GameState.learningScore;
+      GameState.sessionResults.arcadeScore = GameState.arcadeScore;
+
+      // Update Summary UI
+      document.getElementById('sum-learn-score').innerText = GameState.learningScore;
+      document.getElementById('sum-accuracy').innerText = `${accuracyPct}%`;
+      document.getElementById('sum-arcade-score').innerText = GameState.arcadeScore;
+
+      // Mastery threshold check (80% score threshold)
+      const isMastered = accuracyPct >= 80;
+      const statusBadge = document.getElementById('sum-mastery-status');
+      if (isMastered) {
+        statusBadge.innerText = "MENGUASAI (≥80%)";
+        statusBadge.className = "text-xs md:text-sm font-black text-emerald-400 mt-1";
+      } else {
+        statusBadge.innerText = "PERLU BIMBINGAN";
+        statusBadge.className = "text-xs md:text-sm font-black text-amber-400 mt-1";
+      }
+
+      // Objective breakdown calculations
+      const sp1Items = GameState.sessionResults.challengeResults.filter(c => c.standardCode.includes("5.1"));
+      const sp1Correct = sp1Items.filter(c => c.firstAttemptAccuracy).length;
+      document.getElementById('sum-sp1-val').innerText = `${sp1Correct} / 4 Skor Penuh`;
+      document.getElementById('sum-sp1-bar').style.width = `${(sp1Correct / 4) * 100}%`;
+
+      const sp2Items = GameState.sessionResults.challengeResults.filter(c => c.standardCode.includes("5.2"));
+      const sp2Correct = sp2Items.filter(c => c.firstAttemptAccuracy).length;
+      document.getElementById('sum-sp2-val').innerText = `${sp2Correct} / 4 Skor Penuh`;
+      document.getElementById('sum-sp2-bar').style.width = `${(sp2Correct / 4) * 100}%`;
+
+      const sp3Items = GameState.sessionResults.challengeResults.filter(c => c.standardCode.includes("5.3"));
+      const sp3Correct = sp3Items.filter(c => c.firstAttemptAccuracy).length;
+      document.getElementById('sum-sp3-val').innerText = `${sp3Correct} / 4 Skor Penuh`;
+      document.getElementById('sum-sp3-bar').style.width = `${(sp3Correct / 4) * 100}%`;
+
+      document.getElementById('hud-bar').classList.add('hidden');
+      document.getElementById('screen-summary').classList.remove('hidden');
+    }
+
+    function exportResultsJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(GameState.sessionResults, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `CQ_ANALYTICS_${GameState.playerCode}_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportResultsCSV() {
+      const headers = [
+        "student_id", "subject", "topic", "standard_code", "challenge_id",
+        "player_answer", "correct_answer", "attempts", "first_attempt_accuracy",
+        "earned_score", "learning_score_total", "arcade_score", "status", "timestamp"
+      ];
+
+      const rows = GameState.sessionResults.challengeResults.map(r => [
+        `"${GameState.playerCode}"`,
+        `"${GameState.sessionResults.subject}"`,
+        `"${GameState.sessionResults.topic}"`,
+        `"${r.standardCode}"`,
+        `"${r.challengeId}"`,
+        `"${r.playerAnswer}"`,
+        `"${r.correctAnswer}"`,
+        r.attempts,
+        r.firstAttemptAccuracy ? "TRUE" : "FALSE",
+        r.earnedScore,
+        GameState.learningScore,
+        GameState.arcadeScore,
+        `"${GameState.sessionResults.completionStatus}"`,
+        `"${r.timestamp}"`
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `REKOD_PENTAKSIRAN_${GameState.playerCode}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    document.getElementById('btn-export-json').onclick = exportResultsJSON;
+    document.getElementById('btn-export-csv').onclick = exportResultsCSV;
+
+    let animClock = 0;
+
+    function renderGame() {
+      animClock += 0.03;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Save context for camera scroll
+      ctx.save();
+      ctx.translate(-Math.round(camera.x), -Math.round(camera.y));
+
+      // 1. Parallax Fantasy Skies and Backdrop
+      const cam = camera.x;
+      if (GameState.currentLevel === 1) {
+        // Lush Forest Dusk Background
+        const grad = ctx.createLinearGradient(cam, 0, cam, 720);
+        grad.addColorStop(0, '#091e1d');
+        grad.addColorStop(0.5, '#134e4a');
+        grad.addColorStop(1, '#06201b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cam, 0, canvas.width, canvas.height);
+
+        // Distant Trees silhouette
+        ctx.fillStyle = '#062d29';
+        for (let i = 0; i < 20; i++) {
+          const tx = i * 220 - (cam * 0.2 % 220);
+          ctx.beginPath();
+          ctx.moveTo(cam + tx, 640);
+          ctx.lineTo(cam + tx + 60, 280);
+          ctx.lineTo(cam + tx + 120, 640);
+          ctx.fill();
+        }
+
+        // Sunrays passing through canopy (representing straight-line light SP 5.1)
+        ctx.save();
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.06)';
+        for (let i = 0; i < 8; i++) {
+          const rayX = i * 360 - (cam * 0.4 % 360);
+          ctx.beginPath();
+          ctx.moveTo(cam + rayX, 0);
+          ctx.lineTo(cam + rayX + 90, 0);
+          ctx.lineTo(cam + rayX + 220, 720);
+          ctx.lineTo(cam + rayX + 70, 720);
+          ctx.fill();
+        }
+        ctx.restore();
+
+      } else if (GameState.currentLevel === 2) {
+        // Floating Islands Cosmic Sunset
+        const grad = ctx.createLinearGradient(cam, 0, cam, 720);
+        grad.addColorStop(0, '#1e1b4b');
+        grad.addColorStop(0.6, '#312e81');
+        grad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cam, 0, canvas.width, canvas.height);
+
+        // Distant floating crystals
+        ctx.fillStyle = 'rgba(129, 140, 248, 0.15)';
+        for (let i = 0; i < 14; i++) {
+          const cx = i * 260 - (cam * 0.15 % 260);
+          ctx.beginPath();
+          ctx.arc(cam + cx, 220 + Math.sin(animClock + i) * 30, 18, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+      } else {
+        // Mastery Mountain Aurora Sky
+        const grad = ctx.createLinearGradient(cam, 0, cam, 720);
+        grad.addColorStop(0, '#0c1a2d');
+        grad.addColorStop(0.5, '#1e293b');
+        grad.addColorStop(1, '#020617');
+        ctx.fillStyle = grad;
+        ctx.fillRect(cam, 0, canvas.width, canvas.height);
+
+        // Aurora Rainbow Shimmer (Representing dispersion SP 5.3)
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        const rainbowColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7'];
+        rainbowColors.forEach((color, idx) => {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 14;
+          ctx.beginPath();
+          ctx.arc(cam + 600, 760, 620 + idx * 14, Math.PI * 1.15, Math.PI * 1.85);
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      // 2. Render Platforms
+      for (const p of worldPlatforms) {
+        if (p.type === 'ground') {
+          // Lush earth ground
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(p.x, p.y, p.width, p.height);
+          ctx.fillStyle = GameState.currentLevel === 1 ? '#10b981' : GameState.currentLevel === 2 ? '#6366f1' : '#38bdf8';
+          ctx.fillRect(p.x, p.y, p.width, 10);
+        } else {
+          // Floating stepping blocks
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = p.type === 'wood' ? '#78350f' : p.type === 'stone' ? '#334155' : '#0284c7';
+          ctx.beginPath();
+          ctx.roundRect(p.x, p.y, p.width, p.height, 8);
+          ctx.fill();
+
+          // Top highlight surface
+          ctx.fillStyle = p.type === 'wood' ? '#b45309' : p.type === 'stone' ? '#64748b' : '#7dd3fc';
+          ctx.beginPath();
+          ctx.roundRect(p.x, p.y, p.width, 6, 4);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 3. Render Hazards
+      for (const h of worldHazards) {
+        if (h.type === 'spikes') {
+          // Sharp Spikes
+          ctx.fillStyle = '#ef4444';
+          const spikeCount = Math.floor(h.width / 18);
+          for (let s = 0; s < spikeCount; s++) {
+            ctx.beginPath();
+            ctx.moveTo(h.x + s * 18, h.y + h.height);
+            ctx.lineTo(h.x + s * 18 + 9, h.y);
+            ctx.lineTo(h.x + (s + 1) * 18, h.y + h.height);
+            ctx.fill();
+          }
+        } else if (h.type === 'orb') {
+          // Glowing hazard orb
+          ctx.save();
+          ctx.shadowColor = '#f43f5e';
+          ctx.shadowBlur = 18;
+          ctx.fillStyle = '#e11d48';
+          ctx.beginPath();
+          ctx.arc(h.x + h.width / 2, h.y + h.height / 2, h.width / 2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core pulse
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(h.x + h.width / 2, h.y + h.height / 2, h.width / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 4. Render Portals
+      for (const portal of worldPortals) {
+        ctx.save();
+        const pCenterX = portal.x + portal.width / 2;
+        const pCenterY = portal.y + portal.height / 2;
+
+        ctx.shadowColor = portal.unlocked ? '#38bdf8' : '#64748b';
+        ctx.shadowBlur = portal.unlocked ? 25 : 8;
+
+        // Arch Frame
+        ctx.strokeStyle = portal.unlocked ? '#38bdf8' : '#475569';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.ellipse(pCenterX, pCenterY, portal.width / 2, portal.height / 2, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Inner Vortex
+        if (portal.unlocked) {
+          const rot = animClock * 2;
+          const vortexGrad = ctx.createRadialGradient(pCenterX, pCenterY, 5, pCenterX, pCenterY, portal.width / 2);
+          vortexGrad.addColorStop(0, '#ffffff');
+          vortexGrad.addColorStop(0.4, '#38bdf8');
+          vortexGrad.addColorStop(1, '#1e1b4b');
+          ctx.fillStyle = vortexGrad;
+          ctx.beginPath();
+          ctx.ellipse(pCenterX, pCenterY, portal.width / 2 - 4, portal.height / 2 - 4, rot, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Sparkle Label
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 12px Nunito';
+          ctx.textAlign = 'center';
+          ctx.fillText("PORTAL AKTIF", pCenterX, portal.y - 12);
+        } else {
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+          ctx.fill();
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 11px Nunito';
+          ctx.textAlign = 'center';
+          ctx.fillText(`Perlu ${GameState.totalCrystalsTarget} Kristal`, pCenterX, portal.y - 10);
+        }
+        ctx.restore();
+      }
+
+      // 5. Render Learning Crystals
+      for (const c of worldCrystals) {
+        if (!c.collected) {
+          ctx.save();
+          const floatY = c.y + Math.sin(animClock * 3 + c.x) * 8;
+
+          ctx.shadowColor = c.color;
+          ctx.shadowBlur = 20;
+
+          // Diamond Crystal Polygon
+          ctx.fillStyle = c.color;
+          ctx.beginPath();
+          ctx.moveTo(c.x, floatY - 18);
+          ctx.lineTo(c.x + 14, floatY);
+          ctx.lineTo(c.x, floatY + 18);
+          ctx.lineTo(c.x - 14, floatY);
+          ctx.closePath();
+          ctx.fill();
+
+          // Facet Sparkle
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(c.x, floatY - 14);
+          ctx.lineTo(c.x + 6, floatY);
+          ctx.lineTo(c.x, floatY + 5);
+          ctx.closePath();
+          ctx.fill();
+
+          // Standard badge
+          ctx.fillStyle = '#e2e8f0';
+          ctx.font = '800 10px Nunito';
+          ctx.textAlign = 'center';
+          ctx.fillText(c.data.standardCode, c.x, floatY - 24);
+
+          ctx.restore();
+        }
+      }
+
+      // 6. Render Animated Particles
+      for (const pt of particles) {
+        ctx.save();
+        ctx.globalAlpha = pt.alpha;
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 7. Render Animated Character (Explorer Hero)
+      ctx.save();
+      if (player.invulnerableTimer > 0 && Math.floor(animClock * 20) % 2 === 0) {
+        ctx.globalAlpha = 0.4; // Flicker on damage
+      }
+
+      const px = player.x;
+      const py = player.y;
+
+      // Draw character body
+      ctx.fillStyle = '#3b82f6'; // Explorer Suit
+      ctx.beginPath();
+      ctx.roundRect(px + 6, py + 18, 30, 30, 8);
+      ctx.fill();
+
+      // Belt
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(px + 6, py + 34, 30, 6);
+
+      // Head
+      ctx.fillStyle = '#fed7aa'; // Skin tone
+      ctx.beginPath();
+      ctx.arc(px + 21, py + 14, 13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Explorer Hat
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.ellipse(px + 21, py + 6, 17, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(px + 12, py - 4, 18, 10);
+
+      // Flashlight / Sinar Torch (Symbolizing Light Topic)
+      ctx.fillStyle = '#64748b';
+      const torchX = player.facingRight ? px + 30 : px - 6;
+      ctx.fillRect(torchX, py + 26, 14, 8);
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(player.facingRight ? torchX + 14 : torchX, py + 30, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Light Cone from character's torch (SP 5.1 representation)
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.12)';
+      ctx.beginPath();
+      if (player.facingRight) {
+        ctx.moveTo(torchX + 14, py + 30);
+        ctx.lineTo(torchX + 160, py - 10);
+        ctx.lineTo(torchX + 160, py + 70);
+      } else {
+        ctx.moveTo(torchX, py + 30);
+        ctx.lineTo(torchX - 160, py - 10);
+        ctx.lineTo(torchX - 160, py + 70);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#0f172a';
+      const eyeOffset = player.facingRight ? 4 : -4;
+      ctx.beginPath();
+      ctx.arc(px + 21 + eyeOffset, py + 14, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Legs animation
+      ctx.fillStyle = '#1e3a8a';
+      const legWalk = Math.sin(animClock * 15) * (player.vx !== 0 ? 8 : 0);
+      ctx.fillRect(px + 10, py + 48, 8, 10 + legWalk);
+      ctx.fillRect(px + 24, py + 48, 8, 10 - legWalk);
+
+      ctx.restore();
+
+      // Restore camera context
+      ctx.restore();
+    }
+
+    let lastTime = performance.now();
+
+    function gameLoop(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      updatePhysics(dt);
+      renderGame();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.getElementById('btn-start-game').onclick = () => {
+      sound.init();
+      const codeInput = document.getElementById('input-player-id').value.trim();
+      if (codeInput) {
+        GameState.playerCode = codeInput;
+        GameState.sessionResults.playerCode = codeInput;
+      }
+      GameState.startedAt = new Date();
+      GameState.sessionResults.startedAt = GameState.startedAt.toISOString();
+
+      document.getElementById('screen-menu').classList.add('hidden');
+      document.getElementById('hud-bar').classList.remove('hidden');
+
+      GameState.gameRunning = true;
+      loadLevel(1);
+    };
+
+    document.getElementById('btn-instructions').onclick = () => {
+      document.getElementById('screen-instructions').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-close-instructions').onclick = () => {
+      document.getElementById('screen-instructions').classList.add('hidden');
+    };
+
+    document.getElementById('btn-pause-toggle').onclick = () => {
+      GameState.isPaused = true;
+      document.getElementById('modal-pause').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-resume-game').onclick = () => {
+      GameState.isPaused = false;
+      document.getElementById('modal-pause').classList.add('hidden');
+    };
+
+    document.getElementById('btn-restart-level').onclick = () => {
+      GameState.isPaused = false;
+      document.getElementById('modal-pause').classList.add('hidden');
+      loadLevel(GameState.currentLevel);
+    };
+
+    document.getElementById('btn-quit-main').onclick = () => {
+      GameState.isPaused = false;
+      GameState.gameRunning = false;
+      document.getElementById('modal-pause').classList.add('hidden');
+      document.getElementById('hud-bar').classList.add('hidden');
+      document.getElementById('screen-menu').classList.remove('hidden');
+    };
+
+    document.getElementById('btn-audio-toggle').onclick = () => {
+      sound.init();
+      sound.enabled = !sound.enabled;
+      document.getElementById('icon-sound-on').classList.toggle('hidden', !sound.enabled);
+      document.getElementById('icon-sound-off').classList.toggle('hidden', sound.enabled);
+    };
+
+    document.getElementById('btn-replay-game').onclick = () => {
+      document.getElementById('screen-summary').classList.add('hidden');
+      document.getElementById('hud-bar').classList.remove('hidden');
+      GameState.lives = 3;
+      GameState.learningScore = 0;
+      GameState.arcadeScore = 0;
+      GameState.sessionResults.challengeResults = [];
+      GameState.gameRunning = true;
+      loadLevel(1);
+    };
+
+    // Initialize animation loop
+    window.onload = function () {
+      resizeCanvas();
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>
